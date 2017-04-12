@@ -1,0 +1,72 @@
+<html>
+<head>
+   <title>Project 1</title>
+   <style type="text/css">
+
+   /* On mouse hover, lighten state color */
+   path:hover {
+      fill-opacity: .7;
+   }
+
+   /* Style for Custom Tooltip */
+   div.tooltip {
+      position: absolute;
+      text-align: center;
+      width: 60px;
+      height: 28px;
+      padding: 2px;
+      font: 12px sans-serif;
+      background: white;
+      border: 0px;
+      border-radius: 8px;
+      pointer-events: none;
+   }
+
+   /* Legend Font Style */
+   body {
+      font: 11px sans-serif;
+   }
+
+   /* Legend Position Style */
+   .legend {
+      position:absolute;
+      left:800px;
+      top:350px;
+   }
+   </style>
+   <svg width = "960" height = "600"></svg>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+   <meta charset="utf-8">
+   <script src="https://d3js.org/d3-color.v1.min.js"></script>
+   <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+   <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+   <script src="https://d3js.org/d3.v3.min.js"></script>
+   <script src="https://d3js.org/topojson.v2.min.js"></script>
+
+   <!--map code -->
+   <script src="../map.js"></script>
+
+</head>
+
+<body>
+   <div id = 'spatialData'>
+        <h1>Spatial data: </h1>
+        <select id = "spatialMenu">
+               <option value="">--------</option>
+               <option value="on_zayo">On Zayo Network</option>
+               <option value="not_on_zayo">Not on Zayo Network</option>
+        </select>
+       <script>
+var on_zayo = "On Zayo Network";
+var not_on_zayo = "Not on Zayo Network";
+
+d3.select('#spatialMenu')
+  .on('change', function(a) {
+    var menu = eval(d3.select(this).property('value'));
+    map(menu);
+});
+
+      </script>
+   </div>
+</body>
+</html>
