@@ -51,16 +51,30 @@
 <body>
    <div id = 'spatialData'>
         <h1>Spatial data: </h1>
-        <select id = "spatialMenu">
+        <label for="spatialMenu">Zayo network status</label>
+        <select id = "spatialMenu" name="spatialMenu">
                <option value="">--------</option>
                <option value="on_zayo">On Zayo Network</option>
                <option value="not_on_zayo">Not on Zayo Network</option>
         </select>
+        <label for="productMenu">Product Type</label>
+        <select id = "productMenu" name="productMenu">
+               <option value="">--------</option>
+               <option value="on_zayo">On Zayo Network</option>
+               <option value="not_on_zayo">Not on Zayo Network</option>
+        </select>
+
        <script>
-var on_zayo = "On Zayo Network";
-var not_on_zayo = "Not on Zayo Network";
+//var on_zayo = "On Zayo Network";
+//var not_on_zayo = "Not on Zayo Network";
 
 d3.select('#spatialMenu')
+  .on('change', function(a) {
+    var menu = eval(d3.select(this).property('value'));
+    map(menu);
+});
+
+d3.select('#productMenu')
   .on('change', function(a) {
     var menu = eval(d3.select(this).property('value'));
     map(menu);

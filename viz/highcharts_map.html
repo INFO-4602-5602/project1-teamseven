@@ -1,0 +1,196 @@
+<html>
+<head>
+   <title>Project 1</title>
+   <style type="text/css">
+
+   /* On mouse hover, lighten state color */
+   path:hover {
+      fill-opacity: .7;
+   }
+
+   /* Style for Custom Tooltip */
+   div.tooltip {
+      position: absolute;
+      text-align: center;
+      width: 60px;
+      height: 28px;
+      padding: 2px;
+      font: 12px sans-serif;
+      background: white;
+      border: 0px;
+      border-radius: 8px;
+      pointer-events: none;
+   }
+
+   /* Legend Font Style */
+   body {
+      font: 11px sans-serif;
+   }
+
+   /* Legend Position Style */
+   .legend {
+      position:absolute;
+      left:800px;
+      top:350px;
+   }
+   </style>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<div id="container" style="height: 520px; min-width: 310px; width: 800px; margin: 0 auto; text-align:center; line-height: 520px">
+    Downloading map...
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.6/proj4.js"></script>
+<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<script src="https://code.highcharts.com/maps/modules/data.js"></script>
+<script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/mapdata/countries/us/us-all.js"></script>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+
+</head>
+
+<body>
+<script>
+
+    var H = Highcharts,
+        map = H.maps['countries/us/us-all'],
+        chart;
+
+    $('#container').highcharts('Map', {
+
+        title: {
+            text: 'Characteristics of buildings not on Zayo network'
+        },
+
+        tooltip: {
+            formatter: function () {
+                return 'Build Cost: ' + this.point.buildCost  + '<br>Net classification: ' + this.point.classification;
+            },
+            crosshairs: [{
+                zIndex: 5,
+                dashStyle: 'dot',
+                snap: false,
+                color: 'white'
+            }, {
+                zIndex: 5,
+                dashStyle: 'dot',
+                snap: false,
+                color: 'white'
+            }],
+        },
+
+        mapNavigation: {
+            enabled: true
+        },
+
+        series: [{
+            name: 'Basemap',
+            mapData: map,
+            borderColor: '#606060',
+            nullColor: '#F6F2F2',
+            showInLegend: false
+        }]
+    });
+
+    // Add series with state capital bubbles
+    var buildCost = {};
+    var buildings_small = [];
+    var buildings_medium = [];
+    var buildings_far = [];
+    d3.csv('../data/ZayoHackathonData_Buildings.csv', function(map_data){
+        console.log('1');
+        $.each(map_data, function (i){
+            if (i < 2000){
+             var color;
+             if (map_data[i]['On Zayo Network Status']==='Not on Zayo Network'){
+               if (map_data[i]['Network Proximity'] <= 100){
+                 color = "#87AED7"
+                 buildings_small.push({'name' : map_data[i]['Building ID'],
+                                  'lat' : Number(map_data[i]['Latitude']),
+                                 'lon' : Number(map_data[i]['Longitude']),
+                                 'color': color,
+                                 'buildCost': map_data[i][' Estimated Build Cost '],
+                                 'classification':map_data[i]['Net Classification']});
+
+              } else if (map_data[i]['Network Proximity'] <= 1000){
+                 color = "#BDADEA";
+                 buildings_medium.push({'name' : map_data[i]['Building ID'],
+                                  'lat' : Number(map_data[i]['Latitude']),
+                                 'lon' : Number(map_data[i]['Longitude']),
+                                 'color': color,
+                                 'buildCost': map_data[i][' Estimated Build Cost '],
+                                 'classification':map_data[i]['Net Classification']});
+              } else {
+                 color = "#BEA2C2";
+                 buildings_far.push({'name' : map_data[i]['Building ID'],
+                                  'lat' : Number(map_data[i]['Latitude']),
+                                 'lon' : Number(map_data[i]['Longitude']),
+                                 'color': color,
+                                 'buildCost': map_data[i][' Estimated Build Cost '],
+                                 'classification':map_data[i]['Net Classification']});
+              }
+           }
+          }
+          });
+
+        chart = $('#container').highcharts();
+        chart.addSeries({
+            type: 'mappoint',
+            name: 'Network < 100 miles',
+            data: buildings_small,
+            maxSize: '12%',
+            turboThreshold: 16000,
+            color: '#87AED7'
+        });
+        chart.addSeries({
+            type: 'mappoint',
+            name: 'Network 100-1000 miles',
+            data: buildings_medium,
+            maxSize: '12%',
+            turboThreshold: 16000,
+            color: '#BDADEA'
+        });
+        chart.addSeries({
+            type: 'mappoint',
+            name: 'Network >1000 miles',
+            data: buildings_far,
+            maxSize: '12%',
+            turboThreshold: 16000,
+            color: '#BEA2C2'
+        });
+    });
+
+    // Display custom label with lat/lon next to crosshairs
+    $('#container').mousemove(function (e) {
+        if (!chart.lab) {
+            chart.lab = chart.renderer.text('', 0, 0)
+                .attr({
+                zIndex: 5
+            })
+                .css({
+                color: '#505050'
+            })
+                .add();
+        }
+
+        e = chart.pointer.normalize(e);
+        var position = chart.fromPointToLatLon({
+            x: chart.xAxis[0].toValue(e.chartX),
+            y: chart.yAxis[0].toValue(e.chartY)
+        });
+
+        chart.lab.attr({
+            x: e.chartX + 5,
+            y: e.chartY - 22,
+            text: 'Lat: ' + position.lat.toFixed(2) + '<br>Lon: ' + position.lon.toFixed(2)
+        });
+    });
+
+    $('#container').mouseout(function (e) {
+        if (chart.lab) {
+            chart.lab.destroy();
+            chart.lab = null;
+        };
+    });
+      </script>
+   </div>
+</body>
+</html>
