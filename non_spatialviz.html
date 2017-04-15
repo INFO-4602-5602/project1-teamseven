@@ -1,0 +1,483 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body stylebackground="grey">
+<div>
+<div id="colorgraph"></div>
+<div>
+<input type="checkbox" class="statusCheckbox" value="OnZayoNetwork" checked=true> On Zayo Network
+<input type="checkbox" class="statusCheckbox" value="NotOnZayoNetworkStatus" checked=true> Not On Zayo Network
+<br/>
+<svg id="mychart"></svg>
+</div>
+</div>
+<script type="text/javascript">
+    
+//setting up the margins    
+    var margin = {top: 60, right: 55, bottom: 20, left: 220},
+      width = parseInt(d3.select("#mychart").style("width")) - margin.left - margin.right,
+      height = parseInt(d3.select("#mychart").style("height")) - margin.top - margin.bottom;
+
+
+    //difining different axes
+    var dimensions = [
+      {
+        name: "Vertical",
+        scale: d3.scale.ordinal().rangePoints([0, height]),
+        type: String
+      },
+
+      {
+        name: "Annualrevenue",
+        scale: d3.scale.log().base(10).domain([1, 100000000]).range([0, height]),
+        type: Number
+      },
+
+        {
+        name: "X36MRCList",
+        scale: d3.scale.log().base(10).domain([1, 100]).range([0, height]),
+        type: Number
+      }
+
+    ];
+
+    var x = d3.scale.ordinal()
+        .domain(dimensions.map(function(d) { return d.name; }))
+        .rangePoints([0, width]);
+
+    var line = d3.svg.line()
+        .defined(function(d) { return !isNaN(d[1]); })
+        .interpolate("monotone")
+        ;
+
+
+    //colors for different sectors
+
+    var color = 
+    d3.scale.ordinal()
+    .range(["#2ca02c","#ffb0a1",
+    "#5c2c00",
+    "#a6ffbf",
+    "#b3f0ff",
+    "#e6ff42",
+    "#f0d8d3",
+    "#ff5200",
+    "#f754ff",
+    "#9effa3",
+    "#143319",
+    "#002caa",
+    "#fc2bff",
+    "#cfa6ff",
+    "#2800e0", ])
+    ;
+    
+
+    // function tp merge the data
+    function innerJoin(list1, list2, list1_length, list2_length, select) {
+        var c = [];
+
+        for (var i = 0; i < list1_length; i++) {
+            var x = list1[i];
+
+            for (var j = 0; j < list2_length; j++) { // cartesian product - all combinations
+                var y = select(x, list2[j]);  // filter out the rows and columns you want
+                if (y) c.push(y);         // if a row is returned add it to the table
+            }
+        }
+
+        return c;
+        }
+
+
+    var yAxis = d3.svg.axis()
+        .orient("right").ticks(0, ".1s");
+        ;
+
+
+    var yAxis2 = d3.svg.axis()
+        .orient("left");
+
+    var yAxis4 = d3.svg.axis()
+        .orient("right").ticks(0, ".1s");
+        ;
+
+    var svg = d3.select("#mychart").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var dimension = svg.selectAll(".dimension")
+        .data(dimensions)
+      .enter().append("g")
+        .attr("class", "dimension")
+        .attr("transform", function(d) { return "translate(" + x(d.name) + ")"; });
+
+        d3.selectAll(".statusCheckbox").on("change",update);
+    
+    
+    
+    //function to update the graph
+    function update()
+    {
+        var choices = [];
+        d3.selectAll(".statusCheckbox").each(function(d){
+          cb = d3.select(this);
+          if(cb.property("checked")){
+            choices.push(cb.property("value"));
+          }
+        
+        });
+        
+        if(choices.length < 1)
+            {
+                d3.select("#mychart").select("*").remove();
+            }
+        else
+            {
+        
+                var choicesList=[];
+                choices.forEach(function(d)
+                               {
+                   if(d === "OnZayoNetwork")
+                       {
+                           choicesList.push("On Zayo Network");
+                       }
+                    else
+                        {
+                            choicesList.push("Not on Zayo Network");
+                        }
+
+                });
+
+                drawGraph(choicesList);
+            }
+    }
+    
+    //drawing the graph
+    d3.csv("data/ZayoHackathonData_Accounts_cleanup.csv", function(data) {
+      d3.csv("data/ZayoHackathonData_CPQs_cleanup.csv", function(data1) {
+          
+          svg.select("s")
+          data1.forEach( function(d) { d.X36MRCList = (parseFloat(d.X36MRCList) * 12)+parseFloat(d.X36NRRList) });
+          
+        
+          var merged_data = innerJoin(data, data1, data.length, data1.length, function(data, data1) { 
+      
+                if(data.AccountID === data1.AccountID)
+                    {
+                        return {
+                                AccountID: data.AccountID, AnnualRevenue: data.AnnualRevenue, DandBRevenue:data.DandBRevenue, X36MRCList: data1.X36MRCList,
+                                Vertical: data.Vertical, Industry: data.Industry
+                               };
+                    }
+      
+      
+          });
+            
+           var avgs = d3.nest()
+                .key(function(d) {return d.Vertical;})
+                .rollup(function(v) {return d3.sum(v, function(d) { return parseFloat(d.AnnualRevenue); })})
+                .entries(merged_data)
+                ;
+           
+            var listOfObjects=[];
+            
+
+            var avgs1 = d3.nest()
+                .key(function(d) {return d.Vertical;})
+                .rollup(function(v) {return d3.sum(v, function(d) { return parseFloat(d.DandBRevenue); })})
+                .entries(merged_data)
+                ;
+          
+            var avgs2 = d3.nest()
+                .key(function(d) {return d.Vertical;})
+                .rollup(function(v) {return d3.sum(v, function(d) { return parseFloat(d.X36MRCList); })})
+                .entries(merged_data)
+                ;
+            
+            avgs.forEach(
+                function(d) {
+                var tempObject = {Industry:(data.filter(function(s) { return s.Vertical === d.key ;})[0]).Industry ,Vertical: d.key, Annualrevenue: d.values, DandBRevenue: (avgs1.filter(function(s) { return s.key === d.key ;})[0])["values"], X36MRCList:(avgs2.filter(function(s) { return s.key === d.key ;})[0])["values"] };
+                listOfObjects.push(tempObject);
+                
+                }
+            );
+           
+            var dInt = listOfObjects.indexOf(function(s) { return s.Vertical ===""; });
+            listOfObjects.splice(dInt,1);
+            listOfObjects.sort(function(a, b) { return d3.ascending(a.Vertical, b.Vertical)});
+            
+          
+            dimensions[0].scale.domain(listOfObjects.map(function(d) {return d[dimensions[0].name]; }));
+            dimensions[1].scale.domain([1,d3.max(listOfObjects, function(d){return d.Annualrevenue;})]).nice();
+            dimensions[2].scale.domain([1,d3.max(listOfObjects, function(d){return d.Annualrevenue;})]).nice();
+            
+            svg.append("g")
+            .attr("class", "background")
+            .selectAll("path")
+            .data(listOfObjects)
+            .enter().append("path")
+            .attr("d", draw);
+
+            svg.append("g")
+            .attr("class", "foreground")
+            .selectAll("path")
+            .data(listOfObjects)
+            .enter().append("path")
+            .attr("d", draw)
+            .style("stroke", function(d) { return color(d.Industry); });
+        
+            dimension.append("g")
+            .each(function(d,i) { 
+            if(i==0){
+                d3.select(this).call(yAxis2.scale(d.scale)).attr("class", "axis2"); 
+                } else if(i==1){
+                d3.select(this).call(yAxis4.scale(d.scale)).attr("class", "axis");
+                } else if(i==5){
+                d3.select(this).call(yAxis3.scale(d.scale)).attr("class", "axis2");
+            } else {
+                d3.select(this).call(yAxis.scale(d.scale)).attr("class", "axis");
+            }
+            })
+            .append("text")
+            .attr("class", "title")
+            .attr("text-anchor", "middle")
+            .attr("dy", "1em")
+            .attr("y", -40)
+            .text(function(d) { return d.name; })
+            .call(wrap, 95);
+          
+          
+              svg.select(".axis2").selectAll("text:not(.title)")
+            .attr("class", "label")
+            .data(listOfObjects, function(d) { return d.name || d; });
+          
+        var projection = svg.selectAll(".axis2 text,.background path,.foreground path")
+      .on("mouseover", mouseover)
+      .on("mouseout", mouseout)
+      .classed("inactive", true);;
+          
+           function mouseover(d) {
+        svg.classed("active", true);
+        projection.classed("inactive", function(p) { return p !== d; });
+        projection.filter(function(p) { return p === d; })
+        .each(moveToFront);
+      }
+
+      function mouseout(d) {
+        svg.classed("active", false);
+        projection.classed("inactive", true);
+      }
+
+  function moveToFront() {
+    this.parentNode.appendChild(this);
+  }
+          
+          })});
+    
+    
+    function drawGraph(choices){
+        
+        d3.select("#mychart").select("*").remove();
+        
+        var yAxis = d3.svg.axis()
+        .orient("right").ticks(0, ".1s");
+        ;
+
+        
+        var yAxis2 = d3.svg.axis()
+        .orient("left");
+    
+
+        var yAxis3 = d3.svg.axis()
+        .orient("right");
+
+        var yAxis4 = d3.svg.axis()
+            .orient("right").ticks(0, ".1s");
+            ;
+    
+    var svg = d3.select("#mychart").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var dimension = svg.selectAll(".dimension")
+        .data(dimensions)
+      .enter().append("g")
+        .attr("class", "dimension")
+        .attr("transform", function(d) { return "translate(" + x(d.name) + ")"; });
+    
+    d3.selectAll(".statusCheckbox").on("change",update);
+    
+        
+    d3.csv("data/ZayoHackathonData_Accounts_cleanup.csv", function(data) {
+      d3.csv("data/ZayoHackathonData_CPQs_cleanup.csv", function(data1) {
+          
+          
+          data1.forEach( function(d) { d.X36MRCList = (parseFloat(d.X36MRCList) * 12)+parseFloat(d.X36NRRList) });
+          
+          if(choices.length == 1)
+              {
+                  console.log(choices);
+                  data1 = data1.filter(function(d) {
+                     
+                      return (d.OnZayoNetworkStatus === choices[0]);
+                     
+                  });
+                  
+              }
+          console.log(data1[0]);
+          var merged_data = innerJoin(data, data1, data.length, data1.length, function(data, data1) { 
+      
+                if(data.AccountID === data1.AccountID)
+                    {
+                        return {
+                                AccountID: data.AccountID, AnnualRevenue: data.AnnualRevenue, DandBRevenue:data.DandBRevenue, X36MRCList: data1.X36MRCList,
+                                Vertical: data.Vertical, Industry: data.Industry
+                               };
+                    }
+      
+      
+          });
+            
+           var avgs = d3.nest()
+                .key(function(d) {return d.Vertical;})
+                .rollup(function(v) {return d3.sum(v, function(d) { return parseFloat(d.AnnualRevenue); })})
+                .entries(merged_data)
+                ;
+           
+            var listOfObjects=[];
+            
+
+            var avgs1 = d3.nest()
+                .key(function(d) {return d.Vertical;})
+                .rollup(function(v) {return d3.sum(v, function(d) { return parseFloat(d.DandBRevenue); })})
+                .entries(merged_data)
+                ;
+          
+            var avgs2 = d3.nest()
+                .key(function(d) {return d.Vertical;})
+                .rollup(function(v) {return d3.sum(v, function(d) { return parseFloat(d.X36MRCList); })})
+                .entries(merged_data)
+                ;
+            
+            avgs.forEach(
+                function(d) {
+                var tempObject = {Industry:(data.filter(function(s) { return s.Vertical === d.key ;})[0]).Industry ,Vertical: d.key, Annualrevenue: d.values, DandBRevenue: (avgs1.filter(function(s) { return s.key === d.key ;})[0])["values"], X36MRCList:(avgs2.filter(function(s) { return s.key === d.key ;})[0])["values"] };
+                listOfObjects.push(tempObject);
+                
+                }
+            );
+           
+            var dInt = listOfObjects.indexOf(function(s) { return s.Vertical ===""; });
+            listOfObjects.splice(dInt,1);
+            listOfObjects.sort(function(a, b) { return d3.ascending(a.Vertical, b.Vertical)});
+            
+          
+            dimensions[0].scale.domain(listOfObjects.map(function(d) {return d[dimensions[0].name]; }));
+            dimensions[1].scale.domain([1,d3.max(listOfObjects, function(d){return d.Annualrevenue;})]).nice();
+            dimensions[2].scale.domain([1,d3.max(listOfObjects, function(d){return d.Annualrevenue;})]).nice();
+            
+            svg.append("g")
+            .attr("class", "background")
+            .selectAll("path")
+            .data(listOfObjects)
+            .enter().append("path")
+            .attr("d", draw);
+
+            svg.append("g")
+            .attr("class", "foreground")
+            .selectAll("path")
+            .data(listOfObjects)
+            .enter().append("path")
+            .attr("d", draw)
+            .style("stroke", function(d) { return color(d.Industry); });
+        
+            dimension.append("g")
+            .each(function(d,i) { 
+            if(i==0){
+                d3.select(this).call(yAxis2.scale(d.scale)).attr("class", "axis2"); 
+                } else if(i==1){
+                d3.select(this).call(yAxis4.scale(d.scale)).attr("class", "axis");
+                } else if(i==5){
+                d3.select(this).call(yAxis3.scale(d.scale)).attr("class", "axis2");
+            } else {
+                d3.select(this).call(yAxis.scale(d.scale)).attr("class", "axis");
+            }
+            })
+            .append("text")
+            .attr("class", "title")
+            .attr("text-anchor", "middle")
+            .attr("dy", "1em")
+            .attr("y", -40)
+            .text(function(d) { return d.name; })
+            .call(wrap, 95);
+          
+          
+              svg.select(".axis2").selectAll("text:not(.title)")
+            .attr("class", "label")
+            .data(listOfObjects, function(d) { return d.name || d; });
+          
+        var projection = svg.selectAll(".axis2 text,.background path,.foreground path")
+      .on("mouseover", mouseover)
+      .on("mouseout", mouseout)
+      .classed("inactive", true);;
+          
+           function mouseover(d) {
+        svg.classed("active", true);
+        projection.classed("inactive", function(p) { return p !== d; });
+        projection.filter(function(p) { return p === d; })
+        .each(moveToFront);
+      }
+
+      function mouseout(d) {
+        svg.classed("active", false);
+        projection.classed("inactive", true);
+      }
+
+      function moveToFront() {
+        this.parentNode.appendChild(this);
+      }
+
+              })});
+
+        }
+
+    function draw(d) {
+      return line(dimensions.map(function(dimension) {
+        return [x(dimension.name), dimension.scale(d[dimension.name])];
+      }));
+    }
+      function wrap(text, width) {
+      text.each(function() {
+        var text = d3.select(this),
+            words = text.text().split(/\s+/).reverse(),
+            word,
+            line = [],
+            lineNumber = 0,
+            lineHeight = 1.1, // ems
+            y = text.attr("y"),
+            dy = parseFloat(text.attr("dy")),
+            tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+        while (word = words.pop()) {
+            console.log(word)
+          line.push(word);
+          tspan.text(line.join(" "));
+          if (tspan.node().getComputedTextLength() > width) {
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+          }
+        }
+      });
+    }
+    
+</script>
+</body>
+</html>
