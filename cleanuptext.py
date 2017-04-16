@@ -1,5 +1,5 @@
 import csv
-with open("ZayoHackathonData_Accounts.csv", "rU") as csvfile:
+with open("ZayoHackathonData_Services.csv", "rU") as csvfile:
     reader1 = csv.reader(csvfile)
     writerList = []
     for row in reader1:
@@ -18,7 +18,7 @@ with open("ZayoHackathonData_Accounts.csv", "rU") as csvfile:
         if('0' not in L):
                 writerList.append(L)
 
-with open("ZayoHackathonData_Accounts_cleanup.csv","wB") as writercsvfile:
+with open("ZayoHackathonData_Services_cleanup.csv","wB") as writercsvfile:
     spamwriter = csv.writer(writercsvfile,delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
     for writer in writerList:
         stringchar = ",".join(map(str, writer))
