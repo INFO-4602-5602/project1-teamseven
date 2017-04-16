@@ -1,5 +1,5 @@
 # Project1-teamseven
-project1-teamseven created by GitHub Classroom
+Project1-teamseven created by GitHub Classroom
 
 <h2> Visualizations Information </h2>
 
@@ -10,7 +10,7 @@ project1-teamseven created by GitHub Classroom
 
 
 <h2> Team Roles </h2>
-<li>Rachel </li>
+**Rachel **
 <li> Zachary </li>
 <li> Ashlynn </li>
 <li> Varsha </li>
