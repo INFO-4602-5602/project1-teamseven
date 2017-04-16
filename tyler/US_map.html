@@ -1,0 +1,74 @@
+<html>
+<!-- failure of an attempt for a US state map 
+    Goal was to show a US map and while hovering over states
+    A hovering tooltip would display the number of won, lost, or still opened opportunities in that state
+    Would give Zayo the ability to see what states they were struggling in, succeeding in, or not having any progress in --> 
+
+
+
+<meta charset = "utf-8">
+
+<!-- style type given by another team member 	
+<style type="text/css" href="style.css"></style>
+	-->
+	
+<style>
+	<!-- style of the states
+		 want states to be colored by percentage so fill is none 
+		 want states to be outlined, stroke, in black-->
+	.state{
+		fill: none;
+		stroke: #000000;
+		stroke-width: 1;
+	}
+	
+	<!-- highlight when hovering over state -->
+	.state:hover {
+		fill-opacity: 1;
+	}
+	
+	<!-- the tooltip when hovering over state -->
+	#tooltip {
+		<!-- location and text of tooltip display -->
+		position: absolute;
+		text-align: left;
+		padding: 25px;
+		margin: 15px;
+		font: 12px serif;
+		background: #000000;
+		border: 1px;
+		border-radius: 2px;
+		pointer-events: none;
+	}
+	#tooltip h4{
+		margin:0;
+		font-size:14px;
+	}
+	
+	#tooltip table{
+		table-layout: fixed;
+	}
+</style>
+
+
+<body>
+<!-- Tooltip div -->
+<div id = "tooltip"> </div>
+
+<!-- svg for map for everything else -->
+<svg 
+	width = "800"
+	height = "600"
+	id = "svgStates"> </svg>
+	
+<script src="http://d3js.org/d3.vs3.min.js"></script>
+
+
+
+
+
+
+</body>
+
+
+</html>
