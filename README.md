@@ -10,7 +10,7 @@ Project1-teamseven created by GitHub Classroom
 
 
 <h2> Team Roles </h2>
-* **Rachel **
+Rachel
 <li> Zachary </li>
 <li> Ashlynn </li>
 <li> Varsha </li>
