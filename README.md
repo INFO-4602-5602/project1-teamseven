@@ -6,7 +6,13 @@ Project1-teamseven created by GitHub Classroom
 
 
 <h2> Design Process </h2>
+<li> Non-Spatial Visualization </li>
 
+
+<li> Spatial Visualization </li>
+
+
+<li> Third Visualization </li>
 
 
 <h2> Team Roles </h2>
