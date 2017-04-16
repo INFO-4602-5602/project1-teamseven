@@ -36,6 +36,9 @@ This visualization uses [Highmaps](http://www.highcharts.com/products/highmaps) 
 <li> Zach Non-Spatial Visualization </li>
 This visualization is a simple bar chart that displays on the x-axis all of the different services offered by Zayo, and on the y-axis the number of each service provided to customers. I created a smaller csv file with all pertinent information to use as the dataset called ZayoHackathonData_Services_Cleanup. I viewed this visualization as important because it would allow Zayo to look at which services they are providing the most and least of to customers and take the proper steps into placing their resources into the right services and it would appear that Dark Fiber is the most popular service. The interactivity of this visualization is a hover feature that shows how many customers are receiving a service and what percentage of the total services are in a specific service. I used http://bl.ocks.org/d3noob/8952219 as a resource.
 
+<li> Rachel Data Exploration Visualization </li>
+This visualization is a way for the user to explore the data given by Zayo. This visualization uses Python and Bokeh (a python plotting library: http://bokeh.pydata.org/en/latest/). You can install Bokeh using Anaconda (conda install bokeh) or Pypi (pip install bokeh). Using the command line you can pass in any of the csv files provided and the program will launch a visualization that allows you to explore the different numerical data that is in each file. There is a selection box with which the user can choose which elements they want shown on the x and y axis. Bokeh then has some built in interactions that allow the user to pan and zoom to explore the data further and see if there are interesting patterns to investigate further.
+
 
 <h2> Design Process </h2>
 Our design process included exploratory data analysis in Tableau and Excel, in combination with interactions with the Zayo team. Because the Zayo team wanted to answer, largely open ended questions about the best places to expand markets, we designed visualizations with data exploration in mind. Both the spatial and non-spatial visualizations attempt to provide ways to interact with the data and identify markets that might be profitiable to expand into. 
@@ -43,7 +46,7 @@ Our design process included exploratory data analysis in Tableau and Excel, in c
 
 <h2> Team Roles </h2>
 All members were present for at least one day of brainstorming and discussion on visualization planning.
-<li> Rachel : </li>
+<li> Rachel : Created data exploration visualization.</li>
 <li> Zachary : Created non spatial visualization of services Zayo offers</li>
 <li> Ashlynn : Created spatial visualization. Dashboarded two visualizations. </li>
 <li> Varsha : Created the interactive parallel coordinates plot. Cleaned data.</li>
