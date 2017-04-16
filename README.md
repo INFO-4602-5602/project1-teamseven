@@ -17,11 +17,11 @@ Project1-teamseven created by GitHub Classroom
 
 <h2> Team Roles </h2>
 All members were present for at least one day of brainstorming and discussion on visualization planning.
-Rachel : 
-Zachary : 
-Ashlynn : Dashboarding a spatial visualization
-Varsha : Created a non-spatial visualization
-Tyler :  Created the README.md
+<li> Rachel : </li>
+<li> Zachary : </li>
+<li> Ashlynn : Dashboarding a spatial visualization. </li>
+<li> Varsha : Created a non-spatial visualization. </li>
+<li> Tyler :  Created the README.md. </li>
 
 
 <h2> How to run </h2>
